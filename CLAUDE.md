@@ -54,7 +54,7 @@ Example: Zuid (S) is dealer → West (W) is caller.
 
 **Component tree** (abbreviated):
 ```
-RootLayout (FeltSurface + TopNav + Footer)
+RootLayout (FeltSurface + TopNav + Footer + FeedbackButton)
 ├── Home / OverOns / NotFound
 ├── RuleTopicLayout
 │   ├── ExampleTabs          (simple / twist / full)
@@ -81,7 +81,7 @@ After authoring or editing examples, run `npm run validate-content` to confirm e
 **E2E tests** — Playwright, Chromium only.
 - `e2e/rulebook.spec.ts` — page load, tab switching, step navigation, trump badge, score badges, Dealer/Caller badges.
 - `e2e/home-nav.spec.ts` — Home page navigation and top-nav routing.
-- `e2e/footer.spec.ts` — footer links (Over ons, feedback mailto).
+- `e2e/footer.spec.ts` — footer visibility, Over ons link, Liberapay donate widget script.
 - `e2e/pwa.spec.ts` — PWA manifest/service worker behavior.
 - `e2e/responsive.spec.ts` — responsive layout checks.
 - Config: `playwright.config.ts` — baseURL `http://localhost:4173`, webServer auto-starts `npm run preview`.
@@ -98,7 +98,7 @@ After authoring or editing examples, run `npm run validate-content` to confirm e
 | `unit-test` | `npm test` with JUnit reporter → PR comment |
 | `validate-content` | `npm run validate-content` with JUnit reporter → PR comment |
 | `build` | `npm run build`, uploads `dist/` artifact |
-| `e2e` | downloads `dist/`, caches `~/.cache/ms-playwright`, runs Playwright, uploads HTML report |
+| `e2e` | downloads `dist/`, caches `~/.cache/ms-playwright`, runs Playwright with JUnit reporter → PR comment, uploads HTML report |
 
 ### `deploy.yml` — runs on merge to `main` (or manually via `workflow_dispatch`)
 
@@ -106,7 +106,7 @@ Builds the app, then FTPs `dist/` to `/public_html/troefcall_rulebook/` on Hetzn
 
 Both pipelines use `paths-ignore: ['**/*.md', 'docs/**']` — neither fires on documentation-only changes.
 
-Required repo secrets: `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`, `FEEDBACK_EMAIL` (footer feedback `mailto:` address, injected at build time as `VITE_FEEDBACK_EMAIL`; see `.env.example` for local dev).
+Required repo secrets: `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`, `FEEDBACK_EMAIL` (target address for the floating feedback button/modal, injected at build time as `VITE_FEEDBACK_EMAIL`; see `.env.example` for local dev).
 
 ## Gotchas
 
@@ -115,3 +115,4 @@ Required repo secrets: `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`, `FEEDBACK_E
 - **Vitest / Playwright separation**: `e2e/**` excluded in `vite.config.ts` — keep it there.
 - **Deploy clean-slate is manual-only**: normal push deploys use non-destructive diff sync; a full remote wipe only happens if someone runs `workflow_dispatch` with `clean_slate: true` — treat that as a deliberate drift-recovery action, not routine.
 - **PWA icons**: generated via `scripts/generate-icons.mjs` (uses `sharp`). Only woff2 fonts are precached; woff is excluded intentionally.
+- **Feedback button needs `VITE_FEEDBACK_EMAIL`**: `FeedbackButton` renders nothing if that env var is unset — copy `.env.example` to `.env` locally or the floating button silently disappears.
